@@ -3,8 +3,9 @@ from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate,login,logout
 from myApp.models import customUser
-
 from django.contrib import messages
+from django.contrib import messages
+from myApp import EmailBackEnd
 
 def signupPage(request):
     if request.method == "POST":
@@ -24,21 +25,47 @@ def signupPage(request):
     messages.success(request, 'Signup successful.')
     return render(request, "signup.html")
 
+from django.http import HttpResponse  # Import HttpResponse
+
+from django.shortcuts import render
+from django.contrib import messages
+
 def loginPage(request):
-    
-     if request.method=="POST":
-        username=request.POST.get("username")
-        pass1=request.POST.get("pass")
-        user=authenticate(request,username=username,password=pass1)
+    error_messages = {
+        'username_error': 'Username is required.',
+        'password_error': 'Password is required.',
+        'login_error': 'Invalid username or password. Please try again.',
+    }
+
+    if request.method == "POST":
+        username = request.POST.get("username")
+        pass1 = request.POST.get("pass")
         
-        if user is not None:
-            login(request,user)
-            return redirect("homePage")
+        if not username:
+            messages.error(request, error_messages['username_error'])
+        elif not pass1:
+            messages.error(request, error_messages['password_error'])
         else:
-            return HttpResponse("username not found")
-    
-     return render(request,"login.html")
+            user =authenticate(request, username=username, password=pass1)
+
+            if user is not None:
+                user_type = user.user_type
+
+                if user_type == "1":
+                    return HttpResponse("Admin")
+                elif user_type == "2":
+                    return HttpResponse("Staff")
+                elif user_type == "3":
+                    return HttpResponse("Students")
+            else:
+                messages.error(request, error_messages['login_error'])
+
+    return render(request, "login.html")
+
 
 def homePage(request):
     
     return render(request,"base.html")
+
+
+
