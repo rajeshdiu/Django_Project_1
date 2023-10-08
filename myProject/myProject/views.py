@@ -2,6 +2,7 @@ from django.shortcuts import render,redirect
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate,login,logout
+from django.contrib.auth.decorators import login_required
 from myApp.models import customUser
 from django.contrib import messages
 from django.contrib import messages
@@ -46,26 +47,28 @@ def loginPage(request):
         elif not pass1:
             messages.error(request, error_messages['password_error'])
         else:
-            user =authenticate(request, username=username, password=pass1)
+            user = authenticate(request, username=username, password=pass1)
 
             if user is not None:
                 user_type = user.user_type
 
                 if user_type == "1":
-                    return HttpResponse("Admin")
+                    return redirect("adminHome")
                 elif user_type == "2":
-                    return HttpResponse("Staff")
+                    return redirect("staffHome")
                 elif user_type == "3":
-                    return HttpResponse("Students")
+                    return redirect("studentHome")
             else:
                 messages.error(request, error_messages['login_error'])
 
     return render(request, "login.html")
 
 
-def homePage(request):
-    
-    return render(request,"base.html")
+def logoutPage(rerquest):
+    logout(rerquest)
+    return redirect("loginPage")
 
+def homePage(rerquest):
+    return render(rerquest,"base.html")
 
 
